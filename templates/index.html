@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta
+      name="description"
+      content="Life+ Studio — yapay zekâ destekli diyet, fitness ve günlük sağlık takibi."
+    />
+    <title>Life+ Studio — Sağlık ve fitness</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon.svg') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="app-bg" aria-hidden="true"></div>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Yan menü">
+        <div class="sidebar-brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-text">
+            <span class="brand-name">Life+ Studio</span>
+            <span class="brand-tagline">Diyet · fitness · AI</span>
+          </div>
+        </div>
+
+        <nav class="side-nav" role="tablist" aria-label="Ana bölümler">
+          <button type="button" id="tab-chat" class="side-nav-item is-active" role="tab" aria-selected="true" data-tab="chat">
+            <span class="nav-ic" aria-hidden="true"></span>
+            Asistan
+          </button>
+          <button type="button" id="tab-tracking" class="side-nav-item" role="tab" aria-selected="false" data-tab="tracking">
+            <span class="nav-ic nav-ic-track" aria-hidden="true"></span>
+            Günlük takip
+          </button>
+          <button type="button" id="tab-bmi" class="side-nav-item" role="tab" aria-selected="false" data-tab="bmi">
+            <span class="nav-ic nav-ic-bmi" aria-hidden="true"></span>
+            BMI & analiz
+          </button>
+        </nav>
+
+
+
+        <div class="sidebar-archive">
+          <div class="archive-head">
+            <h2 class="archive-title">Sohbetler</h2>
+            <button type="button" class="btn-mini" id="refresh-archive" title="Listeyi yenile">Yenile</button>
+          </div>
+          <p class="archive-hint">Bu cihazda güvenle saklanır.</p>
+          <ul class="conv-list" id="conv-list" role="list"></ul>
+        </div>
+      </aside>
+
+      <div class="main-shell">
+        <header class="top-bar">
+          <div class="top-bar-heading">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="top-bar-title">Kişisel sağlık merkezi</span>
+          </div>
+          <div class="header-actions">
+            <div class="status-pill" id="ai-status" role="status" aria-live="polite">
+              <span class="status-dot" id="status-dot"></span>
+              <span id="status-label">Kontrol…</span>
+            </div>
+            <button type="button" class="icon-btn" id="theme-toggle" aria-label="Tema değiştir" title="Tema">
+              <span class="icon-theme" aria-hidden="true"></span>
+            </button>
+          </div>
+        </header>
+
+        <main class="app-main">
+          <section id="panel-chat" class="panel shell-card panel-chat is-visible" role="tabpanel" aria-labelledby="tab-chat">
+            <header class="chat-hero">
+              <div class="chat-hero-text">
+                <p class="chat-hero-eyebrow">Asistan</p>
+                <h1 class="chat-hero-title">Beslenme ve hareket rehberiniz</h1>
+                <p class="chat-hero-lead">
+                  Sorularınızı yazın veya sesle anlatın; diyetisyen tonunda, kısa ve net yanıtlar alın.
+                </p>
+              </div>
+              <div class="chat-hero-toolbar" role="toolbar" aria-label="Sohbet araçları">
+                <button type="button" class="chat-action-btn" id="reset-chat" title="Yeni sohbet" aria-label="Yeni sohbet">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 3M3 3v5h5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 21M21 21v-5h-5"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <button type="button" class="chat-action-btn" id="export-chat" title="Sohbeti indir" aria-label="Sohbeti indir">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M12 5v10m0 0l-3.5-3.5M12 15l3.5-3.5M5 19h14"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <button type="button" class="chat-action-btn" id="read-last-btn" title="Son mesaji sesli oku" aria-label="Son mesaji sesli oku">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M4 10v4c0 1.1.9 2 2 2h2l4 3V5l-4 3H6c-1.1 0-2 .9-2 2z"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M16 9.5a4 4 0 0 1 0 5M18 7a7 7 0 0 1 0 10"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </header>
+
+            <div id="chat-box" class="chat-box" role="log" aria-live="polite" aria-relevant="additions">
+              <article class="message bot message-welcome">
+                <div class="message-meta">Asistan</div>
+                <div class="message-body">
+                  Merhaba! Beslenme, egzersiz ve günlük alışkanlıklarınızda yanınızdayım. Nereden başlayalım?
+                </div>
+              </article>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+              <div class="chat-input-row">
+                <button
+                  type="button"
+                  class="input-tool-btn"
+                  id="voice-btn"
+                  aria-label="Sesle yaz"
+                  title="Sesle yaz (mikrofon)"
+                >
+                  <span class="input-tool-icon mic-icon" aria-hidden="true"></span>
+                </button>
+                <label class="sr-only" for="message-input">Mesaj</label>
+                <textarea
+                  id="message-input"
+                  rows="1"
+                  placeholder="Sorunuzu yazın veya sesle anlatın…"
+                  autocomplete="off"
+                  required
+                  maxlength="16000"
+                ></textarea>
+                <button type="submit" class="send-btn" id="send-btn">
+                  <span>Gönder</span>
+                </button>
+              </div>
+            </form>
+            <p class="chat-char-meta" id="char-count">0 / 16000</p>
+          </section>
+
+          <section id="panel-tracking" class="panel shell-card panel-wellness panel-wellness-pro" role="tabpanel" aria-labelledby="tab-tracking">
+            <header class="wellness-hero wellness-hero-pro">
+              <div class="wellness-hero-text">
+                <p class="panel-eyebrow">Günlük takip</p>
+                <h1 class="panel-title">Sağlık günlüğü</h1>
+                <p class="panel-lead">
+                  Her gün ayrı kaydedilir; haftaya dönüp ne yazdığınızı okuyabilirsiniz. AI özeti son 7 günün verisini kullanır.
+                </p>
+              </div>
+              <button type="button" class="btn-ai-primary" id="track-ai-insight" title="Son 7 gün verisiyle AI özeti">
+                <span class="btn-ai-glow" aria-hidden="true"></span>
+                AI hafta özeti
+              </button>
+            </header>
+
+            <div class="track-pro-toolbar">
+              <div class="track-toolbar-row">
+                <label class="track-date-field">
+                  <span class="track-date-field-label">Tarih</span>
+                  <input type="date" class="track-date-input" id="track-day-input" />
+                </label>
+                <button type="button" class="track-btn-secondary" id="track-today-btn">Bugüne dön</button>
+              </div>
+              <p class="track-selected-heading" id="track-selected-heading"></p>
+              <p class="track-past-banner" id="track-past-banner" hidden></p>
+            </div>
+
+            <div class="track-body-split">
+              <div class="track-pane track-pane-overview">
+            <div class="stat-grid stat-grid-extended">
+              <div class="stat-card stat-water">
+                <div class="stat-card-icon" aria-hidden="true"></div>
+                <div class="stat-card-body">
+                  <span class="stat-label">Su</span>
+                  <span class="stat-value"><span id="val-water">0</span> / 2 L</span>
+                  <span class="stat-hint">Önerilen günlük hedef (yaklaşık)</span>
+                </div>
+              </div>
+              <div class="stat-card stat-steps">
+                <div class="stat-card-icon" aria-hidden="true"></div>
+                <div class="stat-card-body">
+                  <span class="stat-label">Adım</span>
+                  <span class="stat-value"><span id="val-steps">0</span></span>
+                  <span class="stat-hint">Hedef çizgisi: 10.000</span>
+                </div>
+              </div>
+              <div class="stat-card stat-mood">
+                <div class="stat-card-icon" aria-hidden="true"></div>
+                <div class="stat-card-body">
+                  <span class="stat-label">Mod</span>
+                  <span class="stat-value"><span id="val-mood">—</span> / 5</span>
+                  <span class="stat-hint">Genel ruh hali</span>
+                </div>
+              </div>
+              <div class="stat-card stat-workout">
+                <div class="stat-card-icon" aria-hidden="true"></div>
+                <div class="stat-card-body">
+                  <span class="stat-label">İdman</span>
+                  <span class="stat-value"><span id="val-workout">0</span> dk</span>
+                  <span class="stat-hint">Hareket & antrenman</span>
+                </div>
+              </div>
+              <div class="stat-card stat-vitality">
+                <div class="stat-card-icon" aria-hidden="true"></div>
+                <div class="stat-card-body">
+                  <span class="stat-label">Yenilenme</span>
+                  <span class="stat-value"><span id="val-vitality">—</span> / 5</span>
+                  <span class="stat-hint">Enerji & toparlanma</span>
+                </div>
+              </div>
+            </div>
+
+                <div class="track-daily-summary-card">
+                  <div class="track-strip-head">
+                    <h3 class="track-subheading">Günlük özet</h3>
+                    <p class="track-strip-desc">Seçili günün ölçüm ve notları — tek bakışta okuyun.</p>
+                  </div>
+                  <div id="track-daily-summary-body" class="track-daily-summary-body"></div>
+                </div>
+
+                <div class="track-daily-ai-card" id="track-daily-ai-card">
+                  <div class="track-daily-ai-toolbar">
+                    <div class="track-strip-head track-daily-ai-intro">
+                      <h3 class="track-subheading">Günlük AI yorumu</h3>
+                      <p class="track-strip-desc">
+                        Seçili güne göre kısa bilgilendirici yorum. Tıbbi tanı veya tedavi önerisi değildir.
+                      </p>
+                    </div>
+                    <button type="button" class="btn-ai-secondary" id="track-daily-ai-btn">
+                      Yorum al
+                    </button>
+                  </div>
+                  <div id="track-daily-ai-body" class="track-daily-ai-body" hidden></div>
+                </div>
+
+                <div class="track-strip-panel">
+                  <div class="track-strip-head">
+                    <h3 class="track-subheading">Haftalık zaman çizelgesi</h3>
+                    <p class="track-strip-desc">Bir güne tıklayın; seçili günün tüm kayıtları sağdaki formda açılır.</p>
+                  </div>
+                  <div id="track-week-strip" class="track-week-strip" role="tablist" aria-label="Son 7 gün"></div>
+                </div>
+
+            <div class="track-chart-card">
+              <div class="track-chart-head">
+                <h3 class="track-chart-title">Su ve adım (7 gün)</h3>
+                <p class="track-chart-legend">
+                  <span class="lg lg-water">Su (litre)</span>
+                  <span class="lg lg-steps">Adım (ölçek)</span>
+                </p>
+              </div>
+              <div class="track-week-bars track-week-bars-dual" id="track-week-bars" aria-hidden="true"></div>
+            </div>
+
+                <div class="track-recap-card">
+                  <div class="track-recap-head">
+                    <h3 class="track-subheading">Bu hafta — kayıt özeti</h3>
+                    <p class="track-strip-desc">Her satır bir gün; tıklayınca üstte tarih ve soldaki özet güncellenir.</p>
+                  </div>
+                  <div id="track-week-recap-list" class="track-recap-list"></div>
+                </div>
+
+            <div id="track-ai-output" class="ai-insight-card" hidden>
+              <div class="ai-insight-head">
+                <span class="ai-insight-badge">AI</span>
+                <h4 class="ai-insight-title">Haftalık gözlem</h4>
+              </div>
+              <div class="ai-insight-body" id="track-ai-body"></div>
+            </div>
+
+              </div>
+
+              <div class="track-pane track-pane-editor">
+            <div class="track-form-modern">
+              <div class="track-form-intro">
+                <h3 class="track-form-title">Günlük kayıt</h3>
+                <p class="track-form-lead" id="track-form-lead">Seçili gün için düzenleyip kaydedin; veriler bu cihazda saklanır.</p>
+              </div>
+
+              <div class="track-form-section">
+                <div class="track-form-section-head">
+                  <h4 class="track-form-section-title">Temel ölçümler</h4>
+                  <p class="track-form-section-desc">Su, adım, mod ve genel yenilenme</p>
+                </div>
+                <div class="track-form-grid">
+                  <label class="track-field">
+                    <span>Su (litre, en fazla 8)</span>
+                    <input
+                      type="number"
+                      id="track-water"
+                      min="0"
+                      max="8"
+                      step="0.1"
+                      inputmode="decimal"
+                      placeholder="0"
+                    />
+                  </label>
+                  <label class="track-field">
+                    <span>Adım</span>
+                    <input type="number" id="track-steps" min="0" max="200000" step="100" placeholder="10000" />
+                  </label>
+                  <label class="track-field">
+                    <span>Mod (1–5)</span>
+                    <select id="track-mood">
+                      <option value="">Seçilmedi</option>
+                      <option value="1">1 — çok düşük</option>
+                      <option value="2">2</option>
+                      <option value="3">3 — orta</option>
+                      <option value="4">4</option>
+                      <option value="5">5 — çok iyi</option>
+                    </select>
+                  </label>
+                  <label class="track-field">
+                    <span>Yenilenme (1–5)</span>
+                    <select id="track-vitality">
+                      <option value="">Seçilmedi</option>
+                      <option value="1">1 — çok yorgun</option>
+                      <option value="2">2</option>
+                      <option value="3">3 — idare eder</option>
+                      <option value="4">4</option>
+                      <option value="5">5 — enerjik / dinlenmiş</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div class="track-form-section">
+                <div class="track-form-section-head">
+                  <h4 class="track-form-section-title">Beslenme</h4>
+                  <p class="track-form-section-desc">Öğünleri kısaca yazmanız yeterli</p>
+                </div>
+                <div class="track-form-grid track-nutrition-grid">
+                  <label class="track-field track-field-full">
+                    <span>Kahvaltı</span>
+                    <textarea id="track-nutrition-breakfast" rows="2" maxlength="1200" placeholder="Örn: yumurta, peynir, zeytin…"></textarea>
+                  </label>
+                  <label class="track-field track-field-full">
+                    <span>Öğle</span>
+                    <textarea id="track-nutrition-lunch" rows="2" maxlength="1200" placeholder="Örn: mercimek çorbası, salata…"></textarea>
+                  </label>
+                  <label class="track-field track-field-full">
+                    <span>Akşam</span>
+                    <textarea id="track-nutrition-dinner" rows="2" maxlength="1200" placeholder="Örn: balık, sebze…"></textarea>
+                  </label>
+                  <label class="track-field track-field-full">
+                    <span>Ara öğün / atıştırmalık</span>
+                    <textarea id="track-nutrition-snacks" rows="2" maxlength="1200" placeholder="Örn: meyve, kuruyemiş…"></textarea>
+                  </label>
+                </div>
+              </div>
+
+              <div class="track-form-section">
+                <div class="track-form-section-head">
+                  <h4 class="track-form-section-title">Hareket ve idman</h4>
+                  <p class="track-form-section-desc">Süre ve ne yaptığınız</p>
+                </div>
+                <div class="track-form-grid">
+                  <label class="track-field">
+                    <span>Süre (dakika)</span>
+                    <input type="number" id="track-workout-minutes" min="0" max="600" step="5" placeholder="0" />
+                  </label>
+                  <label class="track-field track-field-full">
+                    <span>Detay</span>
+                    <textarea id="track-workout-detail" rows="2" maxlength="2000" placeholder="Örn: yürüyüş 40 dk, kuvvet üst vücut…"></textarea>
+                  </label>
+                </div>
+              </div>
+
+              <div class="track-form-section">
+                <div class="track-form-section-head">
+                  <h4 class="track-form-section-title">Sıvı ve içecekler</h4>
+                  <p class="track-form-section-desc">Bardak su dışında ne içildi (çay, kahve, meyve suyu…)</p>
+                </div>
+                <label class="track-field track-field-full">
+                  <span>Ek içecek notu</span>
+                  <textarea id="track-hydration-extra" rows="2" maxlength="1500" placeholder="Örn: 2 fincan filtre kahve, bitki çayı…"></textarea>
+                </label>
+              </div>
+
+              <div class="track-form-section">
+                <div class="track-form-section-head">
+                  <h4 class="track-form-section-title">Günlük not</h4>
+                  <p class="track-form-section-desc">Özet, plan veya hatırlatıcı</p>
+                </div>
+                <label class="track-field track-field-full">
+                  <span>Not</span>
+                  <textarea id="track-note" rows="3" maxlength="2000" placeholder="Örn: sabah yoğun, akşam yürüyüş; uyku iyi…"></textarea>
+                </label>
+              </div>
+
+              <div class="track-save-footer">
+                <p class="track-save-hint" id="track-save-hint" role="status" aria-live="polite"></p>
+                <button type="button" class="btn-track-save" id="track-save">Kaydet</button>
+              </div>
+            </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="panel-bmi" class="panel shell-card panel-bmi-premium" role="tabpanel" aria-labelledby="tab-bmi">
+            <div class="bmi-layout">
+              <div class="bmi-intro">
+                <p class="panel-eyebrow">Vücut kompozisyonu</p>
+                <h1 class="panel-title">BMI hesap ve AI yorum</h1>
+                <p class="panel-lead">
+                  Boy ve kilo ile yaklaşık indeks hesaplanır; ardından AI genel bilgilendirici yorum sunar.
+                  Tıbbi tanı yerine geçmez.
+                </p>
+              </div>
+              <div class="bmi-calculator">
+                <div class="bmi-grid">
+                  <label class="field">
+                    <span>Boy (cm)</span>
+                    <input type="number" id="bmi-height" min="80" max="250" placeholder="175" />
+                  </label>
+                  <label class="field">
+                    <span>Kilo (kg)</span>
+                    <input type="number" id="bmi-weight" min="30" max="300" placeholder="72" />
+                  </label>
+                </div>
+                <div class="bmi-actions">
+                  <button type="button" class="btn-primary" id="bmi-calc">Hesapla</button>
+                  <button type="button" class="btn-ai-secondary" id="bmi-ai-btn" disabled title="Önce hesaplayın">
+                    AI ile yorumla
+                  </button>
+                </div>
+                <div class="bmi-scale" aria-hidden="true">
+                  <div class="bmi-scale-bar">
+                    <span class="z z1"></span><span class="z z2"></span><span class="z z3"></span><span class="z z4"></span>
+                  </div>
+                  <div class="bmi-scale-labels">
+                    <span>Zayıf</span><span>Normal</span><span>Fazla</span><span>Obezite</span>
+                  </div>
+                </div>
+                <div class="bmi-result" id="bmi-result" hidden></div>
+                <div id="bmi-ai-output" class="ai-insight-card ai-insight-card-tight" hidden>
+                  <div class="ai-insight-head">
+                    <span class="ai-insight-badge">AI</span>
+                    <h4 class="ai-insight-title">Yorum</h4>
+                  </div>
+                  <div class="ai-insight-body" id="bmi-ai-body"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="app-footer">
+          <small>
+            Life+ Studio genel bilgilendirme sunar; tıbbi tanı veya tedavi yerine geçmez.
+            Veriler bu cihazda saklanır. PWA: tarayıcıdan &quot;Ana ekrana ekle&quot;.
+          </small>
+        </footer>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

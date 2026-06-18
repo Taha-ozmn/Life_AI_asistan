@@ -1,0 +1,18 @@
+{
+  "name": "Life+",
+  "short_name": "Life+",
+  "description": "Beslenme, egzersiz ve kalori rehberi — Life+",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#0f766e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
